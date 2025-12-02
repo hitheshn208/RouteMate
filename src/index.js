@@ -1,48 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.9.0/maptiler-sdk.umd.min.js"></script>
-    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.9.0/maptiler-sdk.css" rel="stylesheet" />
-    <script src="https://cdn.maptiler.com/leaflet-maptilersdk/v4.1.0/leaflet-maptilersdk.umd.min.js"></script>
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import "./style.css";
 
-    <style>
-        #map{
-            width:100%;
-            height:80vh;
-        }
-    </style>
+let DefaultIcon = L.icon({
+    iconUrl: iconUrl,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 33],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
 
-</head>
-<body>
-    <div id="map"></div>
-    <label for="address">Enter the place to find </label>
-    <input type="text" id="address" placeholder="find place..">
-    <br>
-    <button id="find">FIND</button>
+L.Marker.prototype.options.icon = DefaultIcon;
 
-
-<script>
-    const inpaddress = document.querySelector('#address');
+  const inpaddress = document.querySelector('#address');
     const find = document.querySelector('#find');
 
     const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
-    const key = "8dJGRvS8PmvR5U1Rw6O2" ;
-
-    // Create a MapTiler Layer inside Leaflet
-    const mtLayer = L.maptiler.maptilerLayer({
-        apiKey: key,
-      })
-
     
 
-    let map = null;
+let map = null;
 let start;
 let yourmarker, destmarker = null;
 let route = null;
@@ -156,7 +137,3 @@ async function geoRouteFromSearch(address) {
 
 
 }
-
-</script>
-</body>
-</html>
