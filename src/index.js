@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "./style.css";
+import "./loader.css";
 
 let DefaultIcon = L.icon({
     iconUrl: iconUrl,
@@ -15,36 +16,28 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-  const inpaddress = document.querySelector('#address');
-    const find = document.querySelector('#find');
+const inpaddress = document.querySelector('#address');
+const find = document.querySelector('#find');
+const loadLive = document.querySelector("#loadLocation");
+const dialog = document.querySelector('dialog');
 
-    const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+
+const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
     
 
-let map = null;
+let map = L.map("map").setView([12.9767936, 77.5900820], 5); //Default set to Bangalore
+normal.addTo(map);
 let start;
 let yourmarker, destmarker = null;
 let route = null;
+
+loadLive.addEventListener("click", ()=>{
+    dialog.showModal();
+    getCurrentLoc();
+})
     
-navigator.geolocation.getCurrentPosition((position)=>{
-
-    map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 13);
-    normal.addTo(map);
-
-    start = [position.coords.latitude, position.coords.longitude];
-
-    yourmarker = L.marker([position.coords.latitude, position.coords.longitude]);
-    yourmarker.addTo(map);
-
-    map.flyTo([position.coords.latitude, position.coords.longitude],18, {duration : 1.5});
-
-    yourmarker.bindPopup("<b>Your Location</b>").openPopup();
-
-    console.log("Start initialised " +position.coords.latitude + " " +position.coords.longitude);
-
-});
 
 
 find.addEventListener("click", ()=>{
@@ -64,6 +57,35 @@ document.addEventListener("keydown", (e)=>{
     if(inpaddress.value && e.key === "Enter") find.dispatchEvent(new Event("click"));
     
 });
+
+function getCurrentLoc()
+{
+    if (!navigator.geolocation) {
+        console.log("Geolocation not supported");
+        if (dialog && typeof dialog.close === "function") dialog.close();
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position)=>{
+
+        start = [position.coords.latitude, position.coords.longitude];
+
+        yourmarker = L.marker([position.coords.latitude, position.coords.longitude]);
+        yourmarker.addTo(map);
+
+        map.flyTo([position.coords.latitude, position.coords.longitude],18, {duration : 1.5});
+
+        yourmarker.bindPopup("<b>Your Location</b>").openPopup();
+
+        console.log("Start initialised " +position.coords.latitude + " " +position.coords.longitude);
+        if (dialog && typeof dialog.close === "function") dialog.close();
+
+    }, (error) => {
+        console.log("Error getting location:", error);
+        if (dialog && typeof dialog.close === "function") dialog.close();
+    });
+}
+
 
 async function geoRouteFromSearch(address) {
     try {
