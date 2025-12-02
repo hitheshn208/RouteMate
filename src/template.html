@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet</title>
+    <title>Route Mate</title>
+
 </head>
 <body>
     <div id="map"></div>
-    <label for="address">Enter the place to find </label>
-    <input type="text" id="address" placeholder="find place..">
-    <br>
-    <button id="find">FIND</button>
+
+<div class="contents">
     <button id="loadLocation">Load my live location</button>
 
+    <label for="address">Enter the place to find </label>
+    <input type="text" id="address" placeholder="Find place..">
+    <br>
+    <button id="find">FIND</button>
+</div>
 
 <dialog>
     <div>
-        <!-- From Uiverse.io by mrhyddenn --> 
-        <div class="loader">
-            <span></span>
-        </div>
+        <div class="loader1"></div>
         <p>Finding your location..</p>
     </div>
 </dialog>
+
+<dialog class="carloader">
+<div class="map-search-container">
+  <div class="magnifier"></div>
+  <p>Finding best route...</p>
+</div>
+</dialog>
+
 </body>
 </html>

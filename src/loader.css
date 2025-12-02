@@ -1,14 +1,14 @@
 ::backdrop{
-    background-color: rgba(0, 0, 0, 0.312);
+    background-color: rgba(0, 0, 0, 0.532);
 }
 
 
 dialog{
-    background-color: #212121;
-    width:250px;
-    height:220px;
-    border: 2px white solid;
-    border-radius: 10px;
+    background-color: transparent;
+    width:fit-content;
+    height:fit-content;
+    border: none;
+    outline: none;
 }
 
 dialog>div{
@@ -16,79 +16,93 @@ dialog>div{
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: white;
-    font-size: larger;
+    color: rgb(255, 255, 255);
+    font-size: x-large;
+    font-weight: 300;
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-/* From Uiverse.io by mrhyddenn */ 
-.loader {
+.loader1 {
+  width: 44.8px;
+  height: 44.8px;
   position: relative;
-  width: 150px;
-  height: 150px;
-  background: transparent;
-  border-radius: 50%;
-  box-shadow: 25px 25px 75px rgba(0,0,0,0.55);
-  border: 1px solid #333;
+  transform: rotate(45deg);
+}
+
+.loader1:before,
+.loader1:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50% 50% 0 50%;
+  background: #0000;
+  background-image: radial-gradient(circle 11.2px at 50% 50%,#0000 94%, #ff4747);
+}
+
+.loader1:after {
+  animation: pulse-ytk0dhmd 1s infinite;
+  transform: perspective(336px) translateZ(0px);
+}
+
+@keyframes pulse-ytk0dhmd {
+  to {
+    transform: perspective(336px) translateZ(168px);
+    opacity: 0;
+  }
+}
+
+/*Car loader*/
+/* Container to center everything */
+.map-search-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 20px;
+  font-family: sans-serif;
+  color: #ffffff;
 }
 
-.loader::before {
-  content: '';
-  position: absolute;
-  inset: 20px;
-  background: transparent;
-  border: 1px dashed#444;
+/* The Magnifying Glass Base */
+.magnifier {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 6px solid #5194ff; /* Map Blue Color */
   border-radius: 50%;
-  box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
-  inset 5px 5px 35px rgba(0,0,0,0.25);
+  box-sizing: border-box;
+  animation: scan 2s linear infinite; 
 }
 
-.loader::after {
+/* The Handle */
+.magnifier::after {
   content: '';
   position: absolute;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 1px dashed#444;
-  box-shadow: inset -5px -5px 25px rgba(0,0,0,0.25),
-  inset 5px 5px 35px rgba(0,0,0,0.25);
+  width: 22px;
+  height: 5px;
+  background-color: #5194ff; /* Match border color */
+  bottom: 0px;
+  right: -16px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  transform-origin: left center;
 }
 
-.loader span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50%;
-  height: 100%;
-  background: transparent;
-  transform-origin: top left;
-  animation: radar81 2s linear infinite;
-  border-top: 1px dashed #fff;
-}
-
-.loader span::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: seagreen;
-  transform-origin: top left;
-  transform: rotate(-55deg);
-  filter: blur(30px) drop-shadow(20px 20px 20px seagreen);
-}
-
-@keyframes radar81 {
+/* The Animation */
+@keyframes scan {
   0% {
-    transform: rotate(0deg);
+    transform: translate(-15px, -15px);
   }
-
+  25% {
+    transform: translate(15px, 15px);
+  }
+  50% {
+    transform: translate(-15px, 15px);
+  }
+  75% {
+    transform: translate(15px, -15px);
+  }
   100% {
-    transform: rotate(360deg);
+    transform: translate(-15px, -15px);
   }
 }

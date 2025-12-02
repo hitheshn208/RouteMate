@@ -20,7 +20,7 @@ const inpaddress = document.querySelector('#address');
 const find = document.querySelector('#find');
 const loadLive = document.querySelector("#loadLocation");
 const dialog = document.querySelector('dialog');
-
+const carLoader = document.querySelector(".carloader");
 
 const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
@@ -90,6 +90,7 @@ function getCurrentLoc()
 async function geoRouteFromSearch(address) {
     try {
 
+        carLoader.showModal();
     const nominatimURL = `https://nominatim.openstreetmap.org/search?format=json&q=${address}`;
 
     const geoCoderes = await fetch(nominatimURL);
@@ -116,6 +117,7 @@ async function geoRouteFromSearch(address) {
 
     if (!geoJson.routes) {
         console.log("No route found");
+        carLoader.close();
         return;
     }
 
@@ -136,6 +138,7 @@ async function geoRouteFromSearch(address) {
     }).addTo(map);
 
     console.log("GeoJSON added");
+    carLoader.close();
 
     destmarker.addTo(map); //Adding the marker
 
