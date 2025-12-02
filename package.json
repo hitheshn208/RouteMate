@@ -4,7 +4,9 @@
   "description": "RouteMate is a lightweight navigation system built using Leaflet.js, OpenStreetMap, and the OSRM Routing API. It provides a smooth, real-time navigation experience with live user tracking, route generation, map animation, and intuitive UI interactions — all with zero paid APIs.",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "start": "webpack serve --open"
   },
   "repository": {
     "type": "git",
