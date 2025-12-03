@@ -2,6 +2,8 @@
 {
     flex-grow: 1;
     height:100vh;
+    transition: transform 0.2s linear;
+    transform-origin: center center;
 }
 
 body{
@@ -35,3 +37,6 @@ body{
     background-color: rgb(62, 196, 0);
 }
 
+/* #LocationDisableAlert{
+
+} */

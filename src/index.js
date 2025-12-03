@@ -4,6 +4,7 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "./style.css";
 import "./loader.css";
+import navIcon from "./assets/navPngIcon.png";
 
 let DefaultIcon = L.icon({
     iconUrl: iconUrl,
@@ -13,6 +14,14 @@ let DefaultIcon = L.icon({
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
 });
+
+let navigationIcon = new L.RotatedMarker([lat, lon], {
+    icon: navIcon,          // your car/arrow icon
+    rotationAngle: 0,
+    iconSize: [25, 41],
+    iconAnchor: [12, 33],
+    popupAnchor: [1, -34]
+}).addTo(map);
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -24,6 +33,7 @@ const dialog = document.querySelector('dialog');
 const carLoader = document.querySelector(".carloader");
 const source = document.querySelector('#source');
 const stop = document.querySelector('#stop');
+const mapContainer = document.getElementById("map");
 
 let  start;
 let yourmarker, destmarker = null;
@@ -36,6 +46,11 @@ attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStree
 let map = L.map("map").setView([12.9767936, 77.5900820], 5); //Default set to Bangalore
 normal.addTo(map);
 
+window.addEventListener("load", ()=>{
+    dialog.showModal();
+    getCurrentLoc();
+})
+
 loadLive.addEventListener("click", ()=>{
     dialog.showModal();
     getCurrentLoc();
@@ -43,11 +58,13 @@ loadLive.addEventListener("click", ()=>{
 
 drive.addEventListener("click", ()=>{
     navigation();
+    yourmarker.setIcon(navigationIcon);
     map.flyTo([start[0], start[1]], 18, {duration: 1.5});
 });
 
-stop.addEventListener("Click", ()=>{
+stop.addEventListener("click", ()=>{
     if (watchId) {
+    yourmarker.setIcon(DefaultIcon);
      navigator.geolocation.clearWatch(watchId);
      watchId = null;
   }
@@ -55,19 +72,40 @@ stop.addEventListener("Click", ()=>{
 
 find.addEventListener("click", ()=>{
     const address = destinationBtn.value;
-
     if(!address)
     {
         alert("Enter a valid place name");
         return;
     }
     geoRoute(address);
-})
+});
 
 document.addEventListener("keydown", (e)=>{
     if(destinationBtn.value && e.key === "Enter") find.dispatchEvent(new Event("click"));
     
 });
+
+
+if (DeviceOrientationEvent.requestPermission) {
+  DeviceOrientationEvent.requestPermission().then((response) => {
+    if (response === "granted") {
+      window.addEventListener("deviceorientation", handleOrientation);
+    }
+  });
+} else {
+  window.addEventListener("deviceorientationabsolute", handleOrientation);
+}
+
+function handleOrientation(e) {
+  let heading = e.alpha; 
+  rotateMap(heading);
+}
+
+function rotateMap(angle) {
+  const mapContainer = document.getElementById("map");
+
+  mapContainer.style.transform = `rotate(${-angle}deg)`; 
+}
 
 function getCurrentLoc()
 {
@@ -111,6 +149,9 @@ function getCurrentLoc()
 }
 
 
+
+
+
 async function geoRoute(address) {
     try {
 
@@ -132,9 +173,7 @@ async function geoRoute(address) {
     }
 
     destmarker = L.marker([geoCode[0].lat, geoCode[0].lon]).bindPopup(`<b>${address}</b>`);
-
     console.log("Recieved geo code of " + address + " lat " + geoCode[0].lat + " lon " + geoCode[0].lon );
-
     const orsmURL = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${geoCode[0].lon},${geoCode[0].lat}?overview=full&geometries=geojson`;
 
     const orsmres = await fetch(orsmURL);
@@ -194,3 +233,24 @@ function navigation()
     })
   }
 }
+
+L.RotatedMarker = L.Marker.extend({
+    options: { rotationAngle: 0, rotationOrigin: 'center center' },
+
+    _setPos: function(pos) {
+        L.Marker.prototype._setPos.call(this, pos);
+
+        if (this.options.rotationAngle) {
+            this._icon.style.transform =
+                `rotate(${this.options.rotationAngle}deg)`;
+            this._icon.style.transformOrigin = this.options.rotationOrigin;
+        }
+    },
+
+    setRotationAngle: function(angle) {
+        this.options.rotationAngle = angle;
+        if (this._icon) {
+            this._icon.style.transform = `rotate(${angle}deg)`;
+        }
+    }
+});
