@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
-    "leaflet-rotate": "^0.2.8"
+    "leaflet-rotatedmarker": "^0.2.0"
   }
 }

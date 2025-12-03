@@ -5,6 +5,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "./style.css";
 import "./loader.css";
 import navURL from "./assets/navPngIcon.png";
+import 'leaflet-rotatedmarker';
 
 let DefaultIcon = L.icon({
     iconUrl: iconUrl,
@@ -15,45 +16,18 @@ let DefaultIcon = L.icon({
     shadowSize: [41, 41]
 });
 
-const navLeafletIcon = L.icon({
+let navLeafletIcon = L.icon({
     iconUrl: navURL,
     iconSize: [40, 40],   
     iconAnchor: [20, 20], 
 });
 
-L.RotatedMarker = L.Marker.extend({
-    options: {
-        rotationAngle: 0,
-        rotationOrigin: "center center"
-    },
 
-    _setPos: function (pos) {
-        L.Marker.prototype._setPos.call(this, pos);
-
-        if (this._icon) {
-            this._icon.style.transformOrigin = this.options.rotationOrigin;
-
-            if (this.options.rotationAngle) {
-                this._icon.style.transform =
-                    `rotate(${this.options.rotationAngle}deg)`;
-            }
-        }
-    },
-
-    setRotationAngle: function (angle) {
-        this.options.rotationAngle = angle;
-
-        if (this._icon) {
-            this._icon.style.transform =
-                `rotate(${angle}deg)`;
-        }
-    }
-});
-
-let navIcon = new L.RotatedMarker([12.9767936, 77.5900820], {
+let navIcon = L.marker([12.9716, 77.5946], { 
     icon: navLeafletIcon,
-    rotationAngle: 0
-});
+    rotationAngle: 0,   
+    rotationOrigin: 'center center'
+})
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -87,7 +61,6 @@ normal.addTo(map);
 window.addEventListener("load", ()=>{
     dialog.showModal();
     getCurrentLoc();
-    map.setBearing(180);
 })
 
 loadLive.addEventListener("click", ()=>{
@@ -96,11 +69,11 @@ loadLive.addEventListener("click", ()=>{
 })
 
 drive.addEventListener("click", ()=>{
-    navigation();
     yourmarker.remove();
     navIcon.setLatLng([start[0], start[1]]);
     navIcon.addTo(map);
     map.flyTo([start[0], start[1]], 18, {duration: 1.5});
+      navigation();
 });
 
 stop.addEventListener("click", ()=>{
@@ -134,7 +107,7 @@ function handleOrientation(e) {
 }
 
 function rotateMap(angle) {
-  navIcon.setRotationAngle(angle);
+      navIcon.setRotationAngle(angle);
 }
 
 
