@@ -107,7 +107,7 @@ function handleOrientation(e) {
 }
 
 function rotateMap(angle) {
-      navIcon.setRotationAngle(angle);
+      navIcon.setRotationAngle(360 - angle);
 }
 
 
