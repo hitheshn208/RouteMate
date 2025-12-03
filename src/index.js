@@ -75,12 +75,19 @@ let watchId = null;
 const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
-let map = L.map("map").setView([12.9767936, 77.5900820], 5); //Default set to Bangalore
+let map = L.map('map', {
+    center: [12.9716, 77.5946],
+    zoom: 5,
+    rotate: true,       
+    touchRotate: true   
+}); 
+
 normal.addTo(map);
 
 window.addEventListener("load", ()=>{
     dialog.showModal();
     getCurrentLoc();
+    map.setBearing(180);
 })
 
 loadLive.addEventListener("click", ()=>{
@@ -127,7 +134,6 @@ function handleOrientation(e) {
 }
 
 function rotateMap(angle) {
-  mapContainer.style.transform = `rotate(${-angle}deg)`; 
   navIcon.setRotationAngle(angle);
 }
 

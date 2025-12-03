@@ -29,6 +29,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "leaflet-rotate": "^0.2.8"
   }
 }
