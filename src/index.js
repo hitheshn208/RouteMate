@@ -4,7 +4,7 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import "./style.css";
 import "./loader.css";
-import navIcon from "./assets/navPngIcon.png";
+import navURL from "./assets/navPngIcon.png";
 
 let DefaultIcon = L.icon({
     iconUrl: iconUrl,
@@ -15,13 +15,45 @@ let DefaultIcon = L.icon({
     shadowSize: [41, 41]
 });
 
-let navigationIcon = new L.RotatedMarker([lat, lon], {
-    icon: navIcon,          // your car/arrow icon
-    rotationAngle: 0,
-    iconSize: [25, 41],
-    iconAnchor: [12, 33],
-    popupAnchor: [1, -34]
-}).addTo(map);
+const navLeafletIcon = L.icon({
+    iconUrl: navURL,
+    iconSize: [40, 40],   
+    iconAnchor: [20, 20], 
+});
+
+L.RotatedMarker = L.Marker.extend({
+    options: {
+        rotationAngle: 0,
+        rotationOrigin: "center center"
+    },
+
+    _setPos: function (pos) {
+        L.Marker.prototype._setPos.call(this, pos);
+
+        if (this._icon) {
+            this._icon.style.transformOrigin = this.options.rotationOrigin;
+
+            if (this.options.rotationAngle) {
+                this._icon.style.transform =
+                    `rotate(${this.options.rotationAngle}deg)`;
+            }
+        }
+    },
+
+    setRotationAngle: function (angle) {
+        this.options.rotationAngle = angle;
+
+        if (this._icon) {
+            this._icon.style.transform =
+                `rotate(${angle}deg)`;
+        }
+    }
+});
+
+let navIcon = new L.RotatedMarker([12.9767936, 77.5900820], {
+    icon: navLeafletIcon,
+    rotationAngle: 0
+});
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -58,7 +90,9 @@ loadLive.addEventListener("click", ()=>{
 
 drive.addEventListener("click", ()=>{
     navigation();
-    yourmarker.setIcon(navigationIcon);
+    yourmarker.remove();
+    navIcon.setLatLng([start[0], start[1]]);
+    navIcon.addTo(map);
     map.flyTo([start[0], start[1]], 18, {duration: 1.5});
 });
 
@@ -85,16 +119,7 @@ document.addEventListener("keydown", (e)=>{
     
 });
 
-
-if (DeviceOrientationEvent.requestPermission) {
-  DeviceOrientationEvent.requestPermission().then((response) => {
-    if (response === "granted") {
-      window.addEventListener("deviceorientation", handleOrientation);
-    }
-  });
-} else {
-  window.addEventListener("deviceorientationabsolute", handleOrientation);
-}
+window.addEventListener("deviceorientationabsolute", handleOrientation);
 
 function handleOrientation(e) {
   let heading = e.alpha; 
@@ -102,10 +127,11 @@ function handleOrientation(e) {
 }
 
 function rotateMap(angle) {
-  const mapContainer = document.getElementById("map");
-
   mapContainer.style.transform = `rotate(${-angle}deg)`; 
+  navIcon.setRotationAngle(angle);
 }
+
+
 
 function getCurrentLoc()
 {
@@ -149,15 +175,11 @@ function getCurrentLoc()
 }
 
 
-
-
-
 async function geoRoute(address) {
     try {
 
         carLoader.showModal();
     const nominatimURL = `https://nominatim.openstreetmap.org/search?format=json&q=${address}`;
-
     const geoCoderes = await fetch(nominatimURL);
     const geoCode = await geoCoderes.json();
 
@@ -167,10 +189,7 @@ async function geoRoute(address) {
             return;
     }
 
-    if(destmarker)
-    {
-        destmarker.remove();
-    }
+    if(destmarker) destmarker.remove();
 
     destmarker = L.marker([geoCode[0].lat, geoCode[0].lon]).bindPopup(`<b>${address}</b>`);
     console.log("Recieved geo code of " + address + " lat " + geoCode[0].lat + " lon " + geoCode[0].lon );
@@ -227,30 +246,9 @@ async function geoRoute(address) {
 
 function navigation()
 {
-     if (!watchId) {
-    watchId = navigator.geolocation.watchPosition((position)=>{
-        yourmarker.setLatLng([position.coords.latitude, position.coords.longitude]);
+     if (!watchId){
+        watchId = navigator.geolocation.watchPosition((position)=>{
+        navIcon.setLatLng([position.coords.latitude, position.coords.longitude]);
     })
   }
 }
-
-L.RotatedMarker = L.Marker.extend({
-    options: { rotationAngle: 0, rotationOrigin: 'center center' },
-
-    _setPos: function(pos) {
-        L.Marker.prototype._setPos.call(this, pos);
-
-        if (this.options.rotationAngle) {
-            this._icon.style.transform =
-                `rotate(${this.options.rotationAngle}deg)`;
-            this._icon.style.transformOrigin = this.options.rotationOrigin;
-        }
-    },
-
-    setRotationAngle: function(angle) {
-        this.options.rotationAngle = angle;
-        if (this._icon) {
-            this._icon.style.transform = `rotate(${angle}deg)`;
-        }
-    }
-});
