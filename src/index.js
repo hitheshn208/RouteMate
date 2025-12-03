@@ -23,9 +23,12 @@ const drive = document.querySelector('#drive');
 const dialog = document.querySelector('dialog');
 const carLoader = document.querySelector(".carloader");
 const source = document.querySelector('#source');
+const stop = document.querySelector('#stop');
+
 let  start;
 let yourmarker, destmarker = null;
 let route = null;
+let watchId = null;
 
 const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
@@ -39,7 +42,15 @@ loadLive.addEventListener("click", ()=>{
 })
 
 drive.addEventListener("click", ()=>{
+    navigation();
     map.flyTo([start[0], start[1]], 18, {duration: 1.5});
+});
+
+stop.addEventListener("Click", ()=>{
+    if (watchId) {
+     navigator.geolocation.clearWatch(watchId);
+     watchId = null;
+  }
 })
 
 find.addEventListener("click", ()=>{
@@ -173,4 +184,13 @@ async function geoRoute(address) {
     catch{
         console.log("Error brooo");
     }
+}
+
+function navigation()
+{
+     if (!watchId) {
+    watchId = navigator.geolocation.watchPosition((position)=>{
+        yourmarker.setLatLng([position.coords.latitude, position.coords.longitude]);
+    })
+  }
 }
