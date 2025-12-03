@@ -3,7 +3,8 @@
     flex-grow: 1;
     height:100vh;
 }
- body{
+
+body{
     margin: 0;
     display: flex;
     flex-direction: row;
@@ -21,14 +22,16 @@
     width:90%;
     height:30px;
     font-weight: 700;
-    color:white;
-    background-color: rgb(41, 133, 255);
+    color:rgb(255, 255, 255);
+    background-color: rgba(25, 190, 0, 0.792);
     border: none;
     margin:1rem;
     box-sizing: border-box;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 #loadLocation:hover{
-    background-color: rgb(15, 119, 255);
+    background-color: rgb(62, 196, 0);
 }
+

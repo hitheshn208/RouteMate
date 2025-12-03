@@ -16,45 +16,45 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const inpaddress = document.querySelector('#address');
+const destinationBtn = document.querySelector('#destination');
 const find = document.querySelector('#find');
 const loadLive = document.querySelector("#loadLocation");
+const drive = document.querySelector('#drive');
 const dialog = document.querySelector('dialog');
 const carLoader = document.querySelector(".carloader");
+const source = document.querySelector('#source');
+let  start;
+let yourmarker, destmarker = null;
+let route = null;
 
 const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 
-    
-
 let map = L.map("map").setView([12.9767936, 77.5900820], 5); //Default set to Bangalore
 normal.addTo(map);
-let start;
-let yourmarker, destmarker = null;
-let route = null;
 
 loadLive.addEventListener("click", ()=>{
     dialog.showModal();
     getCurrentLoc();
 })
-    
 
+drive.addEventListener("click", ()=>{
+    map.flyTo([start[0], start[1]], 18, {duration: 1.5});
+})
 
 find.addEventListener("click", ()=>{
-    const address = inpaddress.value;
+    const address = destinationBtn.value;
+
     if(!address)
     {
         alert("Enter a valid place name");
         return;
     }
-
-    geoRouteFromSearch(address);
-
-    inpaddress.value = "";
+    geoRoute(address);
 })
 
 document.addEventListener("keydown", (e)=>{
-    if(inpaddress.value && e.key === "Enter") find.dispatchEvent(new Event("click"));
+    if(destinationBtn.value && e.key === "Enter") find.dispatchEvent(new Event("click"));
     
 });
 
@@ -66,7 +66,18 @@ function getCurrentLoc()
         return;
     }
 
-    navigator.geolocation.getCurrentPosition((position)=>{
+    navigator.geolocation.getCurrentPosition(async (position)=>{
+    try{
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+        
+        const response = await fetch(url);
+        const result = await response.json();
+
+        source.value = result.display_name;
+    }
+    catch{
+        console.log("Error in Reverse geocoding");
+    }
 
         start = [position.coords.latitude, position.coords.longitude];
 
@@ -78,16 +89,18 @@ function getCurrentLoc()
         yourmarker.bindPopup("<b>Your Location</b>").openPopup();
 
         console.log("Start initialised " +position.coords.latitude + " " +position.coords.longitude);
+        
         if (dialog && typeof dialog.close === "function") dialog.close();
 
-    }, (error) => {
+    }, 
+    (error) => {
         console.log("Error getting location:", error);
         if (dialog && typeof dialog.close === "function") dialog.close();
     });
 }
 
 
-async function geoRouteFromSearch(address) {
+async function geoRoute(address) {
     try {
 
         carLoader.showModal();
@@ -97,6 +110,7 @@ async function geoRouteFromSearch(address) {
     const geoCode = await geoCoderes.json();
 
     if (!geoCode || geoCode.length === 0) {
+            carLoader.close();
             alert("No results found for the given address.");
             return;
     }
@@ -159,6 +173,4 @@ async function geoRouteFromSearch(address) {
     catch{
         console.log("Error brooo");
     }
-
-
 }
