@@ -7,6 +7,7 @@
 }
 
 body{
+    font-family: 'Inter';
     margin: 0;
     display: flex;
     flex-direction: row;
@@ -16,8 +17,14 @@ body{
     height: 100vh;
     width:40%;
     box-sizing: border-box;
-    padding:0.25rem;
+    padding:0.5rem;
     /* background-color: aquamarine; */
+}
+
+label
+{
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
 }
 
 #loadLocation{
@@ -31,11 +38,60 @@ body{
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
+    font-variant: normal;
 }
 
 #loadLocation:hover{
     background-color: rgb(62, 196, 0);
 }
+
+button{
+ padding:5px;   
+ margin-top:1rem;
+    border-radius: 50px;
+    font-variant: small-caps;
+}
+
+#cancel
+{
+    display: none;
+}
+
+.nav-buttons
+{
+    display: none;
+    width:100%;
+    padding: 0.25rem;
+    justify-content: center;
+    align-items: center;
+    gap:0.25rem;
+}
+
+#drive, #stop
+{
+    width:100%;
+
+}
+
+.navigation-section
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.navigation-section p 
+{
+    text-align: center;
+    opacity: 0.5;
+    font-size: x-small;
+}
+
+input
+{
+    padding:5px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* #LocationDisableAlert{
 

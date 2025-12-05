@@ -36,15 +36,19 @@ const find = document.querySelector('#find');
 const loadLive = document.querySelector("#loadLocation");
 const drive = document.querySelector('#drive');
 const dialog = document.querySelector('dialog');
+const cancel = document.querySelector('#cancel');
 const carLoader = document.querySelector(".carloader");
 const source = document.querySelector('#source');
 const stop = document.querySelector('#stop');
-const mapContainer = document.getElementById("map");
+const navButtons = document.querySelector('.nav-buttons');
 
-let  start;
-let yourmarker, destmarker = null;
+
+let  start = null;
+let currentCor;
+let yourmarker = null, destmarker = null;
 let route = null;
 let watchId = null;
+let reverseGeoCodingresult;
 
 const normal = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
@@ -58,10 +62,10 @@ let map = L.map('map', {
 
 normal.addTo(map);
 
-window.addEventListener("load", ()=>{
-    dialog.showModal();
-    getCurrentLoc();
-})
+// window.addEventListener("load", ()=>{
+//     dialog.showModal();
+//     getCurrentLoc();
+// })
 
 loadLive.addEventListener("click", ()=>{
     dialog.showModal();
@@ -70,33 +74,58 @@ loadLive.addEventListener("click", ()=>{
 
 drive.addEventListener("click", ()=>{
     yourmarker.remove();
-    navIcon.setLatLng([start[0], start[1]]);
     navIcon.addTo(map);
-    map.flyTo([start[0], start[1]], 18, {duration: 1.5});
-      navigation();
+    navigation();
 });
 
 stop.addEventListener("click", ()=>{
     if (watchId) {
-    yourmarker.setIcon(DefaultIcon);
-     navigator.geolocation.clearWatch(watchId);
-     watchId = null;
+    navIcon.remove();
+    yourmarker.addTo(map);
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    
   }
-})
+});
 
-find.addEventListener("click", ()=>{
+find.addEventListener("click", async ()=>{
+
+    
+    if(!start && source.value != "")
+    {
+        start = await getGeoCode(source.value);
+    }
+
     const address = destinationBtn.value;
+
     if(!address)
     {
-        alert("Enter a valid place name");
+        alert("Enter a destination");
+        carLoader.close();
         return;
     }
     geoRoute(address);
+    cancel.style.display = "inline";
+    navButtons.style.display = "flex";
 });
+
+cancel.addEventListener("click", ()=>{
+
+    if(route){
+        route.remove();
+        route = null;
+    }
+
+    if(destmarker)
+        destmarker.remove();
+    if(yourmarker)
+        yourmarker.remove();
+
+    navButtons.style.display = "none";
+})
 
 document.addEventListener("keydown", (e)=>{
     if(destinationBtn.value && e.key === "Enter") find.dispatchEvent(new Event("click"));
-    
 });
 
 window.addEventListener("deviceorientationabsolute", handleOrientation);
@@ -109,8 +138,6 @@ function handleOrientation(e) {
 function rotateMap(angle) {
       navIcon.setRotationAngle(360 - angle);
 }
-
-
 
 function getCurrentLoc()
 {
@@ -125,9 +152,9 @@ function getCurrentLoc()
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
         
         const response = await fetch(url);
-        const result = await response.json();
+        reverseGeoCodingresult = await response.json();
 
-        source.value = result.display_name;
+        source.value = reverseGeoCodingresult.display_name;
     }
     catch{
         console.log("Error in Reverse geocoding");
@@ -135,7 +162,11 @@ function getCurrentLoc()
 
         start = [position.coords.latitude, position.coords.longitude];
 
-        yourmarker = L.marker([position.coords.latitude, position.coords.longitude]);
+        if(!yourmarker)
+            yourmarker = L.marker([position.coords.latitude, position.coords.longitude]);
+        else
+            yourmarker.setLatLng([position.coords.latitude, position.coords.longitude]);
+
         yourmarker.addTo(map);
 
         map.flyTo([position.coords.latitude, position.coords.longitude],18, {duration : 1.5});
@@ -171,7 +202,9 @@ async function geoRoute(address) {
     if(destmarker) destmarker.remove();
 
     destmarker = L.marker([geoCode[0].lat, geoCode[0].lon]).bindPopup(`<b>${address}</b>`);
+
     console.log("Recieved geo code of " + address + " lat " + geoCode[0].lat + " lon " + geoCode[0].lon );
+
     const orsmURL = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${geoCode[0].lon},${geoCode[0].lat}?overview=full&geometries=geojson`;
 
     const orsmres = await fetch(orsmURL);
@@ -227,7 +260,43 @@ function navigation()
 {
      if (!watchId){
         watchId = navigator.geolocation.watchPosition((position)=>{
-        navIcon.setLatLng([position.coords.latitude, position.coords.longitude]);
-    })
+            let accuracy = position.coords.accuracy;
+
+            if(accuracy > 60)
+            {
+                console.log("Low accuracy ignoring " + accuracy);
+                return;
+            }
+            navIcon.setLatLng([position.coords.latitude, position.coords.longitude]);
+            currentCor = [position.coords.latitude, position.coords.longitude];
+            map.flyTo([currentCor[0], currentCor[1]], 18, {duration: 1.5});
+
+    }, 
+    (err) => console.log(err),
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout:10000
+    });
   }
+}
+
+async function getGeoCode(address)
+{
+    const nominatimURL = `https://nominatim.openstreetmap.org/search?format=json&q=${address}`;
+    const geoCoderes = await fetch(nominatimURL);
+    const geoCode = await geoCoderes.json();
+
+    if (!geoCode || geoCode.length === 0) {
+            carLoader.close();
+            alert("No results found for the given address.");
+            return;
+    }
+    if(!yourmarker)
+        yourmarker = L.marker([geoCode[0].lat, geoCode[0].lon]);
+    else
+        yourmarker.setLatLng([geoCode[0].lat, geoCode[0].lon]);
+
+    yourmarker.addTo(map)
+    return [geoCode[0].lat, geoCode[0].lon];
 }
