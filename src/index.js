@@ -50,6 +50,7 @@ let yourmarker = null,
 let route = null;
 let watchId = null;
 let reverseGeoCodingresult;
+let sourcePreviousValue;
 
 const normal = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
@@ -97,13 +98,18 @@ source.addEventListener("click", ()=>{
 source.addEventListener("blur", ()=>{
   console.log("Focus lost");
   sourceSuggestions.style.display = "none";
+  if(source.value === "")
+  {
+    source.value = sourcePreviousValue;
+    showDisplay(sourcePreviousValue);
+  }
 })
 
 find.addEventListener("click", async () => {
-  if (!start && source.value != "" && destination.value != "") {
-    source.value = source.value;
+  if (source.value != "" && destination.value != "") {
     start = await getGeoCode(source.value);
-    showDisplay(source.value);
+    let getFullName = await reverseGeoCode(start);
+    showDisplay(getFullName);
   }
 
   const address = destination.value;
@@ -149,6 +155,7 @@ window.addEventListener("deviceorientationabsolute", (e) => {
 
 sourceDisplay.addEventListener("click", () => {
   sourceDisplay.style.display = "none";
+  sourcePreviousValue = source.value;
   source.value = "";
   source.style.display = "block";
   source.focus();
@@ -338,7 +345,16 @@ async function getGeoCode(address) {
   else yourmarker.setLatLng([geoCode[0].lat, geoCode[0].lon]);
 
   yourmarker.addTo(map);
+  console.log("Returning the coordinates of " + address);
   return [geoCode[0].lat, geoCode[0].lon];
+}
+
+async function reverseGeoCode(coordinates)
+{
+  const fetchresp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coordinates[0]}&lon=${coordinates[1]}&format=json`);
+  const respon = await fetchresp.json();
+  console.log("In reverse function " + respon.display_name);
+  return respon.display_name;
 }
 
 function showDisplay(display_name) {
